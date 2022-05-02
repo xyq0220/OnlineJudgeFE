@@ -122,7 +122,11 @@ export default {
     }
     Object.keys(searchParams).forEach((element) => {
       if (searchParams[element]) {
-        params[element] = searchParams[element]
+        if (element === 'tags') {
+          params[element] = searchParams[element] + ''
+        } else {
+          params[element] = searchParams[element]
+        }
       }
     })
     return ajax('problem', 'get', {

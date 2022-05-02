@@ -52,12 +52,22 @@
 
     <Col :span="5">
     <Panel :padding="10">
+      <div slot="title" class="taglist-title">Picked Tags</div>
+      <el-tag
+        v-for="tag in query.tags"
+        :key="tag"
+        closable
+        @close="filterByTag(tag)">
+        {{tag}}
+      </el-tag>
+    </Panel>
+    <Panel :padding="10">
       <div slot="title" class="taglist-title">{{$t('m.Tags')}}</div>
       <Button v-for="tag in tagList"
               :key="tag.name"
               @click="filterByTag(tag.name)"
               type="ghost"
-              :disabled="query.tag === tag.name"
+              :disabled="query.tags.indexOf(tag.name)!==-1"
               shape="circle"
               class="tag-btn">{{tag.name}}
       </Button>
@@ -169,7 +179,7 @@
         query: {
           keyword: '',
           difficulty: '',
-          tag: '',
+          tags: [],
           page: 1,
           limit: 10
         }
@@ -183,8 +193,9 @@
         this.routeName = this.$route.name
         let query = this.$route.query
         this.query.difficulty = query.difficulty || ''
+        console.log(query.tags)
         this.query.keyword = query.keyword || ''
-        this.query.tag = query.tag || ''
+        // this.query.tags = query.tags || []
         this.query.page = parseInt(query.page) || 1
         if (this.query.page < 1) {
           this.query.page = 1
@@ -224,7 +235,12 @@
         })
       },
       filterByTag (tagName) {
-        this.query.tag = tagName
+        let index = this.query.tags.indexOf(tagName)
+        if (index !== -1) {
+          this.query.tags.splice(index, 1)
+        } else {
+          this.query.tags.push(tagName)
+        }
         this.query.page = 1
         this.pushRouter()
       },

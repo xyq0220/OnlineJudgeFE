@@ -31,6 +31,8 @@ import 'echarts/lib/component/legend'
 import 'echarts/lib/component/tooltip'
 import 'echarts/lib/component/toolbox'
 import 'echarts/lib/component/markPoint'
+import Element from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css'
 
 // register global utility filters.
 Object.keys(filters).forEach(key => {
@@ -39,6 +41,10 @@ Object.keys(filters).forEach(key => {
 
 Vue.config.productionTip = false
 Vue.use(iView, {
+  i18n: (key, value) => i18n.t(key, value)
+})
+
+Vue.use(Element, {
   i18n: (key, value) => i18n.t(key, value)
 })
 
