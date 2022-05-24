@@ -114,6 +114,15 @@ export default {
   getProblemTagList () {
     return ajax('problem/tags', 'get')
   },
+  AddProblemTag (id, tags) {
+    let data = {
+      id,
+      tags
+    }
+    return ajax('problem', 'put', {
+      data
+    })
+  },
   getProblemList (offset, limit, searchParams) {
     let params = {
       paging: true,

@@ -65,6 +65,39 @@
                 <Tag type="dot" :color="submissionStatus.color" @click.native="handleRoute('/status/'+submissionId)">
                   {{$t('m.' + submissionStatus.text.replace(/ /g, "_"))}}
                 </Tag>
+              <el-dialog
+                title="提示"
+                :visible.sync="taggingVisible"
+                width="30%"
+                :before-close="handleTaggingClose">
+                <div class="tagging-title">恭喜您通过本题！请选择您认为适合本题的标签。</div>
+                <Card :padding="10">
+                  <div slot="title" class="taglist-title">已选择的标签：</div>
+                  <el-tag
+                  v-for="tag in selectedTags"
+                  :key="tag"
+                  closable
+                  type="success"
+                  @close="handleTagClose(tag)"
+                  >
+                  {{tag}}
+                  </el-tag>
+                </Card>
+                <Card :padding="10">
+                  <div slot="title" class="taglist-title">备选标签：</div>
+                  <el-tag
+                  v-for="tag in allTags"
+                  :key="tag.name"
+                  @click="handleTagClick(tag.name)"
+                  >
+                  {{tag.name}}
+                  </el-tag>
+                </Card>
+                <span slot="footer" class="dialog-footer">
+                  <el-button @click="taggingVisible = false">取 消</el-button>
+                  <el-button type="primary" @click="handleTaggingConfirm()">确 定</el-button>
+                </span>
+              </el-dialog>
               </template>
               <template v-else-if="this.contestID && !OIContestRealTimePermission">
                 <Alert type="success" show-icon>{{$t('m.Submitted_successfully')}}</Alert>
@@ -256,7 +289,11 @@
         largePieInitOpts: {
           width: '500',
           height: '480'
-        }
+        },
+        taggingVisible: false,
+        statusOK: false,
+        allTags: [],
+        selectedTags: []
       }
     },
     beforeRouteEnter (to, from, next) {
@@ -307,6 +344,13 @@
           }
         }, () => {
           this.$Loading.error()
+        })
+        this.getTagList()
+      },
+      getTagList () {
+        api.getProblemTagList().then(res => {
+          this.allTags = res.data.data
+        }, res => {
         })
       },
       changePie (problemData) {
@@ -382,6 +426,10 @@
           let id = this.submissionId
           api.getSubmission(id).then(res => {
             this.result = res.data.data
+            if (this.result.result === 0 && this.statusOK === false) {
+              this.statusOK = true
+              this.taggingVisible = true
+            }
             if (Object.keys(res.data.data.statistic_info).length !== 0) {
               this.submitting = false
               this.submitted = false
@@ -467,6 +515,33 @@
       },
       onCopyError (e) {
         this.$error('Failed to copy code')
+      },
+      handleTaggingClose (done) {
+        this.$confirm('确认关闭？')
+          .then(_ => {
+            done()
+          })
+          .catch(_ => {})
+      },
+      handleTagClose (tag) {
+        let index = this.selectedTags.indexOf(tag)
+        if (index !== -1) {
+          this.selectedTags.splice(index, 1)
+        }
+      },
+      handleTagClick (tag) {
+        let index = this.selectedTags.indexOf(tag)
+        if (index === -1) {
+          this.selectedTags.push(tag)
+        }
+      },
+      handleTaggingConfirm () {
+        api.AddProblemTag(this.problemID, this.selectedTags).then(res => {
+          this.taggingVisible = false
+          this.init()
+        }, res => {
+          this.taggingVisible = false
+        })
       }
     },
     computed: {
@@ -622,6 +697,10 @@
     margin-top: 20px;
     width: 500px;
     height: 480px;
+  }
+
+  .tagging-title{
+    margin-bottom:15px;
   }
 </style>
 
