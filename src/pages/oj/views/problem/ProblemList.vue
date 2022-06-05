@@ -52,7 +52,7 @@
 
     <Col :span="5">
     <Panel :padding="10">
-      <div slot="title" class="taglist-title">Picked Tags</div>
+      <div slot="title" class="taglist-title">选择的标签</div>
       <el-tag
         v-for="tag in query.tags"
         :key="tag"
